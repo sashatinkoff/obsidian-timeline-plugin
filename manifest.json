@@ -1,0 +1,10 @@
+{
+  "id": "timeline-card",
+  "name": "Timeline Card",
+  "version": "2.3.1",
+  "minAppVersion": "1.0.0",
+  "description": "Интерактивная карточка-таймлайн: секции, инлайн-редактирование, медиа-сетка, полноэкранный просмотр, авто-дата, hover-preview и README прямо в настройках.",
+  "author": "you",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}

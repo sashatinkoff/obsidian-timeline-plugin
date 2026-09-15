@@ -1,0 +1,320 @@
+.tc-card {
+	background: var(--background-primary);
+	border-radius: 16px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+	padding: 24px 28px;
+	margin: 12px 0;
+	max-width: 620px;
+}
+
+.tc-card-title {
+	font-family: var(--font-text, serif);
+	font-weight: 700;
+	font-size: 1.5em;
+	margin-bottom: 18px;
+	color: var(--text-normal);
+	cursor: text;
+	border-radius: 6px;
+	padding: 2px 4px;
+	margin-left: -4px;
+}
+.tc-card-title:hover {
+	background: var(--background-modifier-hover);
+}
+
+.tc-list {
+	display: flex;
+	flex-direction: column;
+}
+
+.tc-item {
+	display: flex;
+	gap: 14px;
+}
+
+.tc-marker {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	width: 16px;
+}
+
+.tc-dot {
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	border: 2px solid #6366b0;
+	background: transparent;
+	flex-shrink: 0;
+	margin-top: 3px;
+	cursor: pointer;
+}
+.tc-dot:hover {
+	box-shadow: 0 0 0 3px rgba(99, 102, 176, 0.12);
+}
+
+.tc-item-active .tc-dot {
+	background: #6366b0;
+	box-shadow: 0 0 0 3px rgba(99, 102, 176, 0.18);
+}
+
+.tc-line {
+	flex: 1;
+	width: 2px;
+	background: #d3d4ea;
+	margin-top: 2px;
+	margin-bottom: 2px;
+	min-height: 20px;
+}
+
+.tc-content {
+	padding-bottom: 18px;
+	flex: 1;
+	position: relative;
+}
+
+.tc-title,
+.tc-date,
+.tc-body {
+	cursor: text;
+	border-radius: 6px;
+	padding: 1px 4px;
+	margin-left: -4px;
+}
+.tc-title:hover,
+.tc-date:hover,
+.tc-body:hover {
+	background: var(--background-modifier-hover);
+}
+
+.tc-title {
+	font-weight: 600;
+	color: var(--text-normal);
+	line-height: 1.35;
+}
+
+.tc-date {
+	font-size: 0.82em;
+	color: #6366b0;
+	margin-top: 2px;
+}
+
+.tc-body {
+	margin-top: 6px;
+	font-size: 0.92em;
+	color: var(--text-muted);
+}
+
+.tc-body p {
+	margin: 0.3em 0;
+}
+
+.tc-placeholder {
+	color: var(--text-faint);
+	font-style: italic;
+}
+
+/* Ссылка добавления описания — видна только при наведении на событие,
+   чтобы пустое описание не занимало место постоянно. */
+.tc-body-add {
+	font-size: 0.82em;
+	font-style: normal;
+	color: var(--text-faint);
+	cursor: pointer;
+	margin-top: 4px;
+	opacity: 0;
+	transition: opacity 0.1s ease;
+	display: inline-block;
+}
+.tc-content:hover .tc-body-add {
+	opacity: 1;
+}
+.tc-body-add:hover {
+	color: #6366b0;
+	text-decoration: underline;
+}
+
+.tc-inline-input,
+.tc-body-edit {
+	width: 100%;
+	font: inherit;
+	color: inherit;
+	background: var(--background-secondary);
+	border: 1px solid #6366b0;
+	border-radius: 6px;
+	padding: 3px 6px;
+	box-sizing: border-box;
+}
+
+.tc-body-edit {
+	resize: none;
+	overflow: hidden;
+	min-height: 2.4em;
+	font-family: var(--font-monospace, monospace);
+	font-size: 0.88em;
+	line-height: 1.4;
+	margin-top: 6px;
+}
+
+.tc-delete-btn {
+	position: absolute;
+	top: 0;
+	right: -2px;
+	color: var(--text-faint);
+	cursor: pointer;
+	font-size: 0.8em;
+	opacity: 0;
+	transition: opacity 0.1s ease;
+}
+.tc-item:hover .tc-delete-btn {
+	opacity: 1;
+}
+.tc-delete-btn:hover {
+	color: var(--text-error, #c0392b);
+}
+
+.tc-add-row {
+	display: flex;
+	gap: 16px;
+	margin-top: 4px;
+}
+
+.tc-add-btn {
+	color: #6366b0;
+	font-size: 0.88em;
+	cursor: pointer;
+	display: inline-block;
+}
+.tc-add-btn:hover {
+	text-decoration: underline;
+}
+
+/* Секции — заголовки, разбивающие список событий на группы */
+.tc-section {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	margin: 18px 0 10px 0;
+	padding-bottom: 4px;
+	border-bottom: 1px solid var(--background-modifier-border);
+	position: relative;
+}
+.tc-list > .tc-section:first-child {
+	margin-top: 0;
+}
+.tc-section-label {
+	flex: 1;
+	font-weight: 700;
+	font-size: 0.85em;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	color: var(--text-muted);
+	cursor: text;
+	border-radius: 6px;
+	padding: 1px 4px;
+	margin-left: -4px;
+}
+.tc-section-label:hover {
+	background: var(--background-modifier-hover);
+}
+.tc-section-delete {
+	position: static;
+	opacity: 0;
+	transition: opacity 0.1s ease;
+}
+.tc-section:hover .tc-section-delete {
+	opacity: 1;
+}
+
+/* Модалка README в настройках плагина */
+.tc-readme-modal {
+	max-width: 640px;
+	max-height: 70vh;
+	overflow-y: auto;
+	line-height: 1.5;
+}
+.tc-readme-modal h1,
+.tc-readme-modal h2,
+.tc-readme-modal h3 {
+	margin-top: 1.2em;
+}
+.tc-readme-modal pre {
+	white-space: pre-wrap;
+}
+
+/* Медиа-сетка: перенос блоков на новую строку.
+   Точные размеры каждой ячейки (.tc-media-cell) и картинки внутри задаются
+   напрямую из JS через style.setProperty(..., 'important') — это единственный
+   надёжный способ перебить собственные CSS-правила Obsidian для эмбедов,
+   у которых иногда более высокая специфичность селектора. */
+.tc-media-grid {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	margin-top: 8px;
+}
+.tc-media-caption {
+	line-height: 1.3;
+}
+
+/* Полноэкранный просмотр (свой lightbox — не зависит от режима Reading/Live Preview) */
+.tc-lightbox-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.85);
+	z-index: 9999;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: zoom-out;
+}
+.tc-lightbox-img {
+	max-width: 90vw;
+	max-height: 90vh;
+	border-radius: 4px;
+	box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+/* Сворачивание длинного текста */
+.tc-collapsible.tc-clamped {
+	max-height: 4.5em;
+	overflow: hidden;
+	position: relative;
+	-webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+	mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+}
+.tc-toggle {
+	color: #6366b0;
+	font-size: 0.82em;
+	cursor: pointer;
+	margin-top: 4px;
+}
+.tc-toggle:hover {
+	text-decoration: underline;
+}
+
+/* Подсказки [[ */
+.tc-suggest-dropdown {
+	position: absolute;
+	z-index: 1000;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 8px;
+	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+	max-height: 220px;
+	overflow-y: auto;
+	padding: 4px;
+}
+.tc-suggest-item {
+	padding: 4px 8px;
+	border-radius: 4px;
+	font-size: 0.85em;
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.tc-suggest-item.is-selected,
+.tc-suggest-item:hover {
+	background: var(--background-modifier-hover);
+}

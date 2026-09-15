@@ -1,0 +1,7 @@
+{
+  "mediaSize": 160,
+  "showMediaCaptions": false,
+  "autoDate": true,
+  "dateFormat": "YYYY-MM-DD HH:mm",
+  "dateLocale": "ru"
+}
