@@ -17,6 +17,8 @@ const DEFAULT_SETTINGS = {
 	dateLocale: 'ru',
 	theme: 'purple',
 	customColor: '#6366b0',
+	collapseLongText: true,
+	collapseMaxLines: 3,
 };
 
 const BLOCK_LANGUAGE = 'track';
@@ -647,7 +649,9 @@ function wrapNativeMediaEmbeds(bodyEl, plugin) {
 	removeVisuallyEmptyNodes(bodyEl);
 }
 
-function setupCollapse(bodyEl) {
+function setupCollapse(bodyEl, plugin) {
+	const enabled = plugin && plugin.settings ? plugin.settings.collapseLongText !== false : true;
+
 	const grids = Array.from(bodyEl.querySelectorAll(':scope > .tc-media-grid'));
 	const otherNodes = Array.from(bodyEl.childNodes).filter((node) => !grids.includes(node));
 
@@ -667,6 +671,8 @@ function setupCollapse(bodyEl) {
 		return;
 	}
 
+	if (!enabled) return; // сворачивание отключено в настройках — оставляем текст как есть
+
 	// Собираем "текстовые" узлы в одну обёртку-на-месте-первого-из-них,
 	// сохраняя относительный порядок с рядами медиа.
 	const wrapper = document.createElement('div');
@@ -680,7 +686,21 @@ function setupCollapse(bodyEl) {
 	otherNodes.forEach((node) => wrapper.appendChild(node));
 
 	requestAnimationFrame(() => {
-		if (wrapper.scrollHeight > wrapper.clientHeight + 4) {
+		// Порог считаем по числу строк, а не сравнением scrollHeight/clientHeight
+		// самого элемента — у неограниченного по высоте блока эти величины всегда
+		// равны, поэтому такое сравнение никогда не срабатывало (это и было
+		// причиной поломки: сворачивание переставало включаться вовсе).
+		const computed = window.getComputedStyle(wrapper);
+		let lineHeight = parseFloat(computed.lineHeight);
+		if (!lineHeight || Number.isNaN(lineHeight)) {
+			const fontSize = parseFloat(computed.fontSize) || 14;
+			lineHeight = fontSize * 1.4;
+		}
+		const maxLines = (plugin && plugin.settings && plugin.settings.collapseMaxLines) || 3;
+		const threshold = Math.round(lineHeight * maxLines);
+
+		if (wrapper.scrollHeight > threshold + 4) {
+			wrapper.style.setProperty('--tc-collapse-height', threshold + 'px');
 			wrapper.classList.add('tc-clamped');
 			const toggle = document.createElement('div');
 			toggle.className = 'tc-toggle';
@@ -1038,7 +1058,7 @@ module.exports = class TimelineCardPlugin extends Plugin {
 			wireInternalLinks(viewEl, plugin, ctx.sourcePath);
 			insertMediaCells(viewEl, embeds, plugin);
 			wrapNativeMediaEmbeds(viewEl, plugin);
-			setupCollapse(viewEl);
+			setupCollapse(viewEl, plugin);
 		});
 
 		viewEl.addEventListener('click', (evt) => {
@@ -1222,6 +1242,34 @@ class TimelineCardSettingTab extends PluginSettingTab {
 					.onChange(async (value) => {
 						this.plugin.settings.dateLocale = value.trim() || 'ru';
 						await this.plugin.saveSettings();
+					})
+			);
+
+		containerEl.createEl('h3', { text: 'Текст события' });
+
+		new Setting(containerEl)
+			.setName('Сворачивать длинный текст')
+			.setDesc('Текст события длиннее заданного числа строк обрезается с плавным затуханием, появляется ссылка «Показать полностью».')
+			.addToggle((toggle) =>
+				toggle.setValue(this.plugin.settings.collapseLongText !== false).onChange(async (value) => {
+					this.plugin.settings.collapseLongText = value;
+					await this.plugin.saveSettings();
+					this.plugin.refreshAllRenders();
+				})
+			);
+
+		new Setting(containerEl)
+			.setName('Строк до сворачивания')
+			.setDesc('После скольких строк текст будет обрезан.')
+			.addText((text) =>
+				text
+					.setPlaceholder('3')
+					.setValue(String(this.plugin.settings.collapseMaxLines))
+					.onChange(async (value) => {
+						const num = parseInt(value, 10);
+						this.plugin.settings.collapseMaxLines = isNaN(num) || num < 1 ? 3 : num;
+						await this.plugin.saveSettings();
+						this.plugin.refreshAllRenders();
 					})
 			);
 	}
