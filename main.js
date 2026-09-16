@@ -15,9 +15,37 @@ const DEFAULT_SETTINGS = {
 	autoDate: true,
 	dateFormat: 'YYYY-MM-DD HH:mm',
 	dateLocale: 'ru',
+	theme: 'purple',
+	customColor: '#6366b0',
 };
 
 const BLOCK_LANGUAGE = 'track';
+
+const THEME_PRESETS = {
+	purple: { label: 'Фиолетовая (по умолчанию)', color: '#6366b0' },
+	blue: { label: 'Синяя', color: '#3b82f6' },
+	green: { label: 'Зелёная', color: '#16a34a' },
+	red: { label: 'Красная', color: '#e11d48' },
+	orange: { label: 'Оранжевая', color: '#f97316' },
+	teal: { label: 'Бирюзовая', color: '#0d9488' },
+	graphite: { label: 'Графитовая', color: '#6b7280' },
+};
+
+function getGlobalAccent(plugin) {
+	const settings = plugin.settings || {};
+	if (settings.theme === 'custom' && settings.customColor) return settings.customColor;
+	const preset = THEME_PRESETS[settings.theme];
+	return preset ? preset.color : THEME_PRESETS.purple.color;
+}
+
+// value — либо ключ пресета ("green"), либо hex ("#ff8800"), либо null/undefined
+// (тогда берём глобальную тему из настроек).
+function resolveColorValue(value, plugin) {
+	if (!value) return getGlobalAccent(plugin);
+	if (value.startsWith('#')) return value;
+	const preset = THEME_PRESETS[value.toLowerCase()];
+	return preset ? preset.color : getGlobalAccent(plugin);
+}
 
 // ---------------------------------------------------------------------------
 // Парсинг / сериализация
@@ -32,6 +60,7 @@ function trimTrailingEmptyLines(lines) {
 function parseTimelineSource(source) {
 	const lines = source.split('\n');
 	let cardTitle = null;
+	let cardColor = null;
 	const entries = [];
 	let current = null;
 
@@ -46,6 +75,11 @@ function parseTimelineSource(source) {
 	for (const line of lines) {
 		if (/^##\s/.test(line)) {
 			cardTitle = line.replace(/^##\s+/, '').trim();
+			continue;
+		}
+		const colorMatch = !current ? /^%%\s*color:\s*(.+?)\s*%%$/i.exec(line) : null;
+		if (colorMatch) {
+			cardColor = colorMatch[1].trim();
 			continue;
 		}
 		if (/^####\s/.test(line)) {
@@ -80,13 +114,16 @@ function parseTimelineSource(source) {
 		eventEntries[0].active = true;
 	}
 
-	return { cardTitle, entries };
+	return { cardTitle, cardColor, entries };
 }
 
-function serializeTimeline(cardTitle, entries) {
+function serializeTimeline(cardTitle, cardColor, entries) {
 	const lines = [];
-	if (cardTitle && cardTitle.trim() !== '') {
-		lines.push('## ' + cardTitle.trim());
+	const preamble = [];
+	if (cardTitle && cardTitle.trim() !== '') preamble.push('## ' + cardTitle.trim());
+	if (cardColor) preamble.push('%% color: ' + cardColor + ' %%');
+	if (preamble.length) {
+		lines.push(...preamble);
 		lines.push('');
 	}
 	entries.forEach((entry, idx) => {
@@ -272,6 +309,76 @@ function openLightbox(src, alt) {
 
 	document.body.appendChild(overlay);
 	activeLightbox = overlay;
+}
+
+let activeColorPopover = null;
+
+function closeColorPopover() {
+	if (activeColorPopover) {
+		activeColorPopover.remove();
+		activeColorPopover = null;
+	}
+}
+
+function openColorPicker(anchorEl, plugin, state, commit) {
+	closeColorPopover();
+
+	const pop = document.createElement('div');
+	pop.className = 'tc-color-popover';
+
+	Object.keys(THEME_PRESETS).forEach((key) => {
+		const preset = THEME_PRESETS[key];
+		const swatch = document.createElement('div');
+		swatch.className = 'tc-color-option';
+		swatch.style.background = preset.color;
+		swatch.title = preset.label;
+		swatch.addEventListener('click', () => {
+			state.cardColor = key;
+			commit();
+			closeColorPopover();
+		});
+		pop.appendChild(swatch);
+	});
+
+	const customLabel = document.createElement('label');
+	customLabel.className = 'tc-color-option tc-color-custom';
+	customLabel.title = 'Свой цвет';
+	customLabel.textContent = '⋯';
+	const customInput = document.createElement('input');
+	customInput.type = 'color';
+	customInput.value = resolveColorValue(state.cardColor, plugin);
+	customInput.addEventListener('change', () => {
+		state.cardColor = customInput.value;
+		commit();
+		closeColorPopover();
+	});
+	customLabel.appendChild(customInput);
+	pop.appendChild(customLabel);
+
+	const resetBtn = document.createElement('div');
+	resetBtn.className = 'tc-color-reset';
+	resetBtn.textContent = 'Сбросить (тема по умолчанию)';
+	resetBtn.addEventListener('click', () => {
+		state.cardColor = null;
+		commit();
+		closeColorPopover();
+	});
+	pop.appendChild(resetBtn);
+
+	const rect = anchorEl.getBoundingClientRect();
+	pop.style.top = rect.bottom + 6 + 'px';
+	pop.style.left = Math.max(8, rect.right - 200) + 'px';
+
+	document.body.appendChild(pop);
+	activeColorPopover = pop;
+
+	const onDocMouseDown = (e) => {
+		if (!pop.contains(e.target) && e.target !== anchorEl) {
+			closeColorPopover();
+			document.removeEventListener('mousedown', onDocMouseDown);
+		}
+	};
+	setTimeout(() => document.addEventListener('mousedown', onDocMouseDown), 0);
 }
 
 const IMAGE_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg', 'bmp'];
@@ -763,7 +870,7 @@ module.exports = class TimelineCardPlugin extends Plugin {
 		const file = this.app.vault.getAbstractFileByPath(ctx.sourcePath);
 		if (!file) return;
 
-		const newInner = serializeTimeline(state.cardTitle, state.entries);
+		const newInner = serializeTimeline(state.cardTitle, state.cardColor, state.entries);
 
 		const transform = (data) => {
 			const lines = data.split('\n');
@@ -789,6 +896,15 @@ module.exports = class TimelineCardPlugin extends Plugin {
 		const commit = () => plugin.commitState(state, el, ctx);
 
 		const card = el.createDiv({ cls: 'tc-card' });
+		card.style.setProperty('--tc-accent', resolveColorValue(state.cardColor, plugin));
+
+		const colorSwatch = card.createDiv({ cls: 'tc-color-swatch' });
+		colorSwatch.style.background = resolveColorValue(state.cardColor, plugin);
+		colorSwatch.setAttr('aria-label', 'Цвет карточки');
+		colorSwatch.addEventListener('click', (e) => {
+			e.stopPropagation();
+			openColorPicker(colorSwatch, plugin, state, commit);
+		});
 
 		const titleEl = card.createDiv({ cls: 'tc-card-title' });
 		makeEditableText(titleEl, {
@@ -1011,6 +1127,37 @@ class TimelineCardSettingTab extends PluginSettingTab {
 					}
 				})
 			);
+
+		containerEl.createEl('h3', { text: 'Тема оформления' });
+
+		new Setting(containerEl)
+			.setName('Тема')
+			.setDesc('Акцентный цвет по умолчанию для всех карточек. Для отдельной карточки его можно переопределить кружком в её правом верхнем углу.')
+			.addDropdown((dd) => {
+				Object.keys(THEME_PRESETS).forEach((key) => dd.addOption(key, THEME_PRESETS[key].label));
+				dd.addOption('custom', 'Своя…');
+				dd.setValue(this.plugin.settings.theme || 'purple');
+				dd.onChange(async (value) => {
+					this.plugin.settings.theme = value;
+					await this.plugin.saveSettings();
+					this.plugin.refreshAllRenders();
+					this.display();
+				});
+			});
+
+		if (this.plugin.settings.theme === 'custom') {
+			new Setting(containerEl)
+				.setName('Свой акцентный цвет')
+				.addColorPicker((cp) =>
+					cp.setValue(this.plugin.settings.customColor || '#6366b0').onChange(async (value) => {
+						this.plugin.settings.customColor = value;
+						await this.plugin.saveSettings();
+						this.plugin.refreshAllRenders();
+					})
+				);
+		}
+
+		containerEl.createEl('h3', { text: 'Медиа' });
 
 		new Setting(containerEl)
 			.setName('Размер медиа-миниатюр (px)')

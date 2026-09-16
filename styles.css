@@ -5,6 +5,7 @@
 	padding: 24px 28px;
 	margin: 12px 0;
 	max-width: 620px;
+	position: relative;
 }
 
 .tc-card-title {
@@ -15,7 +16,7 @@
 	color: var(--text-normal);
 	cursor: text;
 	border-radius: 6px;
-	padding: 2px 4px;
+	padding: 2px 28px 2px 4px;
 	margin-left: -4px;
 }
 .tc-card-title:hover {
@@ -43,19 +44,19 @@
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
-	border: 2px solid #6366b0;
+	border: 2px solid var(--tc-accent, #6366b0);
 	background: transparent;
 	flex-shrink: 0;
 	margin-top: 3px;
 	cursor: pointer;
 }
 .tc-dot:hover {
-	box-shadow: 0 0 0 3px rgba(99, 102, 176, 0.12);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc-accent, #6366b0) 12%, transparent);
 }
 
 .tc-item-active .tc-dot {
-	background: #6366b0;
-	box-shadow: 0 0 0 3px rgba(99, 102, 176, 0.18);
+	background: var(--tc-accent, #6366b0);
+	box-shadow: 0 0 0 3px color-mix(in srgb, var(--tc-accent, #6366b0) 18%, transparent);
 }
 
 .tc-line {
@@ -95,7 +96,7 @@
 
 .tc-date {
 	font-size: 0.82em;
-	color: #6366b0;
+	color: var(--tc-accent, #6366b0);
 	margin-top: 2px;
 }
 
@@ -130,7 +131,7 @@
 	opacity: 1;
 }
 .tc-body-add:hover {
-	color: #6366b0;
+	color: var(--tc-accent, #6366b0);
 	text-decoration: underline;
 }
 
@@ -140,7 +141,7 @@
 	font: inherit;
 	color: inherit;
 	background: var(--background-secondary);
-	border: 1px solid #6366b0;
+	border: 1px solid var(--tc-accent, #6366b0);
 	border-radius: 6px;
 	padding: 3px 6px;
 	box-sizing: border-box;
@@ -180,7 +181,7 @@
 }
 
 .tc-add-btn {
-	color: #6366b0;
+	color: var(--tc-accent, #6366b0);
 	font-size: 0.88em;
 	cursor: pointer;
 	display: inline-block;
@@ -284,7 +285,7 @@
 	mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
 }
 .tc-toggle {
-	color: #6366b0;
+	color: var(--tc-accent, #6366b0);
 	font-size: 0.82em;
 	cursor: pointer;
 	margin-top: 4px;
@@ -317,4 +318,80 @@
 .tc-suggest-item.is-selected,
 .tc-suggest-item:hover {
 	background: var(--background-modifier-hover);
+}
+
+/* Цвет карточки — кружок в углу карточки + попап выбора палитры */
+.tc-color-swatch {
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 0 1px var(--background-modifier-border);
+	opacity: 0.35;
+	transition: opacity 0.1s ease;
+}
+.tc-card:hover .tc-color-swatch {
+	opacity: 1;
+}
+
+.tc-color-popover {
+	position: fixed;
+	z-index: 1000;
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	max-width: 220px;
+	background: var(--background-primary);
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 10px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+	padding: 10px;
+}
+.tc-color-option {
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	cursor: pointer;
+	box-shadow: 0 0 0 1px var(--background-modifier-border);
+	flex-shrink: 0;
+}
+.tc-color-option:hover {
+	transform: scale(1.12);
+}
+.tc-color-custom {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: var(--background-secondary);
+	color: var(--text-muted);
+	font-size: 0.7em;
+	overflow: hidden;
+}
+.tc-color-custom input[type='color'] {
+	position: absolute;
+	inset: 0;
+	width: 100%;
+	height: 100%;
+	opacity: 0;
+	cursor: pointer;
+	border: none;
+	padding: 0;
+}
+.tc-color-reset {
+	width: 100%;
+	font-size: 0.8em;
+	color: var(--text-muted);
+	cursor: pointer;
+	text-align: center;
+	padding-top: 6px;
+	margin-top: 2px;
+	border-top: 1px solid var(--background-modifier-border);
+}
+.tc-color-reset:hover {
+	color: var(--tc-accent, #6366b0);
 }
