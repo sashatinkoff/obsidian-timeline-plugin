@@ -8,10 +8,9 @@
 
 ## Установка
 
-1. Создайте папку `<vault>/.obsidian/plugins/timeline-card/`.
-2. Скопируйте туда `manifest.json`, `main.js`, `styles.css`.
-3. **Settings → Community plugins** → включите плагин **Timeline Card**.
-4. Для наведения-превью (п. 3 ниже) убедитесь, что включён core-плагин **Page preview** (Settings → Core plugins).
+1. Скопируйте папку в `<vault>/.obsidian/plugins/timeline-card/`.
+2. **Settings → Community plugins** → включите плагин **Timeline Card**.
+3. Для наведения-превью (п. 3 ниже) убедитесь, что включён core-плагин **Page preview** (Settings → Core plugins).
 
 ## Создание карточки
 
