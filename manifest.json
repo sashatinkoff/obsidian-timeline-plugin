@@ -1,0 +1,10 @@
+{
+  "id": "event-timeline",
+  "name": "Event Timeline",
+  "version": "1.4.4",
+  "minAppVersion": "1.4.0",
+  "description": "Таймлайн событий в блоке ```timeline (и старом ```track): карточки с маркерами, группы по годам и секциям, разрывы линии, медиа, поиск, форма добавления, граф связей и панель свойств.",
+  "author": "you",
+  "authorUrl": "",
+  "isDesktopOnly": false
+}
